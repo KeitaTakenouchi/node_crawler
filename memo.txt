@@ -1,0 +1,1 @@
+javascript:document.write('<xmp>'+document.documentElement.innerHTML+'<\/xmp>');
