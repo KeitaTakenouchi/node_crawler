@@ -1,22 +1,43 @@
 "use strict";
-exports.__esModule = true;
-var Crawler = require("crawler");
-var crawler = new Crawler({
+Object.defineProperty(exports, "__esModule", { value: true });
+const Crawler = require("crawler");
+const U = require("url");
+let visited = [];
+function visit(url) {
+    visited.push(url);
+    crawler.queue(url);
+}
+function isVisited(url) {
+    return visited.indexOf(url) > 0;
+}
+let crawler = new Crawler({
     maxConnections: 10,
     callback: function (error, res, done) {
-        if (error) {
-            console.log(error);
+        try {
+            if (error) {
+                console.log(error);
+            }
+            else {
+                const $ = res.$;
+                console.log($("title").text() + " | " + res.request.uri.href);
+                $("a").each((i, elem) => {
+                    let url = $(elem).attr("href");
+                    let base = res.request.uri.href;
+                    let path = new U.URL(url, base);
+                    let ref = path.href;
+                    if (!isVisited(ref)) {
+                        visit(path.href);
+                    }
+                });
+            }
         }
-        else {
-            var $_1 = res.$;
-            console.log($_1("title").text());
-            var str = $_1("table").find("tr").find("td").each(function () {
-                var i = this.parent.children.indexOf(this);
-                console.log(i + " : " + $_1(this).text());
-            });
+        catch (error) {
+            console.log("ERROR!");
         }
-        done();
+        finally {
+            done();
+        }
     }
 });
-crawler.queue('http://handaijudo.sakura.ne.jp/cgi-bin/calender/sche6.cgi');
+crawler.queue("http://handaijudo.sakura.ne.jp/result.html");
 //# sourceMappingURL=index.js.map

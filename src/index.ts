@@ -1,25 +1,44 @@
 import Crawler = require("crawler");
+import U = require("url");
+
+let visited: Array<string> = [];
+
+function visit(url: string): void {
+    visited.push(url);
+    crawler.queue(url);
+}
+
+function isVisited(url: string): boolean {
+    return visited.indexOf(url) > 0;
+}
 
 let crawler = new Crawler({
     maxConnections: 10,
     callback: function (error, res, done) {
-        if (error) {
-            console.log(error);
-        } else {
-            const $ = res.$;
-            console.log($("title").text());
-            let str = $("table").find("tr").find("td").each(
-                function () {
-                    let i = this.parent.children.indexOf(this);
-                    console.log(i + " : " + $(this).text());
-                }
-            );
+        try {
+            if (error) {
+                console.log(error);
+            } else {
+                const $ = res.$;
+                console.log($("title").text() + " | " + res.request.uri.href);
+                $("a").each((i, elem) => {
+                    let url = $(elem).attr("href");
+                    let base = res.request.uri.href;
+                    let path: URL = new U.URL(url, base);
+
+                    let ref = path.href;
+                    if (!isVisited(ref)) {
+                        visit(path.href);
+                    }
+                });
+            }
+        } catch (error) {
+            console.log("ERROR!");
         }
-        done();
+        finally {
+            done();
+        }
     }
 });
 
-// Queue just one URL, with default callback
-crawler.queue('http://handaijudo.sakura.ne.jp/cgi-bin/calender/sche6.cgi');
-
-
+crawler.queue("https://github.com/Microsoft/TypeScript/pulls");
