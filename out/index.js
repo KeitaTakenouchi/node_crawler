@@ -39,5 +39,5 @@ let crawler = new Crawler({
         }
     }
 });
-crawler.queue("http://handaijudo.sakura.ne.jp/result.html");
+crawler.queue("https://github.com/Microsoft/TypeScript/pulls");
 //# sourceMappingURL=index.js.map
